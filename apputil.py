@@ -66,9 +66,8 @@ class Genius:
 
         for term in search_terms:
             try:
-                artist = self.get_artist(term)
-                if not isinstance(artist, dict):
-                    artist = {}
+                artist_info = self.get_artist(term)
+                artist = artist_info["response"]["artist"]
                     
                 rows.append({
                 "search_term": term,
@@ -76,6 +75,7 @@ class Genius:
                 "artist_id": artist.get("id"),
                 "followers_count": artist.get("followers_count")
                 })
+                
             except Exception as e:
                 print(f"Error fetching data for '{term}': {e}")
                 rows.append({
@@ -84,11 +84,6 @@ class Genius:
                     "artist_id": None,
                     "followers_count": None
                 })
-        # Ensure column order is consistent
-        df = pd.DataFrame(rows, columns=[
-        "search_term",
-        "artist_name",
-        "artist_id",
-        "followers_count"])
+     
 
-        return df
+        return pd.DataFrame(rows)
