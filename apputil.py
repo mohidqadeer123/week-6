@@ -7,7 +7,7 @@ class Genius:
      def __init__(self, access_token):
         if not access_token:
              raise ValueError("Access token is required to access Genius API")
-        self.acesstoken = access_token
+        self.acess_token = access_token
 
 
 # Exercise 2
@@ -20,7 +20,11 @@ class Genius:
         # Search Genius for the term
         search_url = f"http://api.genius.com/search?q={search_term}&access_token={self.access_token}&per_page=15"
         resp = requests.get(search_url)
+        json_data = resp.json()
         hits = json_data['response']['hits']
+
+        if not hits:
+             return {}
     
         # Get first hit's primary artist ID
         artist_id = hits[0]["result"]["primary_artist"]["id"]
@@ -55,7 +59,7 @@ class Genius:
 
             })
 
-        return pd.DataFrame(rows, columns=["search_term", "artist_name", "artist_id", "followers_count"])
+            return pd.DataFrame(rows, columns=["search_term", "artist_name", "artist_id", "followers_count"])
 
 
 
