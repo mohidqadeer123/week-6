@@ -1,70 +1,62 @@
 import requests
 import pandas as pd
 
-# Exercise 1
-# Create class 'Genius'
-class Genius:
-     def __init__(self, access_token):
-        if not access_token:
-             raise ValueError("Access token is required to access Genius API")
-        self.acess_token = access_token
 
+# Exercise 1
+class Genius:
+
+    def __init__(self, access_token):
+        if not access_token:
+            raise ValueError("Access token is required")
+        self.access_token = access_token
+
+        self.base_url = "https://api.genius.com"
+        self.headers = {
+            "Authorization": f"Bearer {self.access_token}"
+        }
 
 # Exercise 2
-    def get_artist(self, search_term):
    
+    def get_artist(self, search_term):
         """
-        Given a search term, search Genius and return the artist object
-        for the first hit's primary artist by calling the artist API path.
+        Search Genius and return artist info for the first hit.
         """
-        # Search Genius for the term
-        search_url = f"http://api.genius.com/search?q={search_term}&access_token={self.access_token}&per_page=15"
-        resp = requests.get(search_url)
+        search_url = f"{self.base_url}/search"
+        params = {"q": search_term}
+
+        resp = requests.get(search_url, headers=self.headers, params=params)
         json_data = resp.json()
+
         hits = json_data['response']['hits']
 
         if not hits:
-             return {}
-    
-        # Get first hit's primary artist ID
+            return {}
+
+        # First hit primary artist ID
         artist_id = hits[0]["result"]["primary_artist"]["id"]
 
-        # Get artist info using that ID
-        artist_url = f"http://api.genius.com/artists/{artist_id}?access_token={self.access_token}"
-        artist_resp = requests.get(artist_url)
-        artist_data = artist_resp.json()["response"]["artist"]
+        # Artist API
+        artist_url = f"{self.base_url}/artists/{artist_id}"
+        artist_resp = requests.get(artist_url, headers=self.headers)
+        artist_data = artist_resp.json()['response']['artist']
 
         return artist_data
 
+    
 # Exercise 3
+
     def get_artists(self, search_terms):
-        """
-        Takes a list of artist search terms, fetches artist information for each one using the Genius API,
-         and returns a DataFrame with selected details.
-        """
+
         rows = []
 
         for term in search_terms:
-            artist_data = self.get_artist(term)
-            if isinstance(artist_data, dict) and 'response' in artist_data:
-                artist = artist_data['response'].get('artist', {})
-            else:
-                artist = artist_data if isinstance(artist_data, dict) else {}
-                 
+            artist = self.get_artist(term)
+
             rows.append({
                 "search_term": term,
                 "artist_name": artist.get("name"),
                 "artist_id": artist.get("id"),
                 "followers_count": artist.get("followers_count")
-
             })
 
-            return pd.DataFrame(rows, columns=["search_term", "artist_name", "artist_id", "followers_count"])
-
-
-
-   
-  
-
-
-    
+        return pd.DataFrame(rows)
