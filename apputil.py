@@ -91,4 +91,4 @@ class Genius:
         "artist_id",
         "followers_count"])
 
-        return pd.DataFrame(rows)
+        return df
